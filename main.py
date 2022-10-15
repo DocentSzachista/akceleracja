@@ -1,9 +1,9 @@
+from cProfile import label
 import numpy as np 
-
+from matplotlib import pyplot as plt
+from time import perf_counter_ns
 def det(arr): 
     def count_det(arr, i, j):
-        if arr.shape == (1,1):
-            return arr[0]
         if arr.shape == (3,3): 
             return (-1) **( i+j ) * ( 
                   arr[0][0] * arr[1][1] * arr[2][2]  
@@ -25,8 +25,28 @@ def det(arr):
         return arr[0][0] * arr[1][1] - arr[1][0] * arr[0][1]
     return count_det(arr, 0, 0)
 
-def test_naive():
-    for i in range(1, 10):
+def det_iterative(arr): 
+    pass
+
+# def det_iterative(arr):
+
+#     rows, columns = arr.shape
+#     det_positive_part = 0 
+    
+#     for column_index in range(columns):
+#         mul_op = 1 
+#         for row_index in range(rows):
+#             dupa_zmienna = column_index+row_index
+#             mul_op *= arr[row_index][dupa_zmienna if dupa_zmienna  < columns else columns - dupa_zmienna] 
+#         det_positive_part += mul_op
+            
+
+
+
+
+
+def test_det():
+    for i in range(1, 11):
         random_matrix = np.random.randint(10, size=(i, i))
         our_impl =  det(random_matrix)
         numpy_impl = round(np.linalg.det(random_matrix))
@@ -37,9 +57,35 @@ def test_naive():
         else:
             print("Guccis")
 
+def measure_time(det_func, size)->list:
+    scores = []
+    for i in range(1, size):
+        random_matrix = np.random.randint(10, size=(i, i))
+        start = perf_counter_ns()
+        det_func(random_matrix)
+        end = perf_counter_ns()
+        score = end - start 
+        scores.append(score)
+    return scores
+
+
 
 if __name__ == "__main__":
-    test_naive()
+    test_det()
+    our_det_scores = measure_time(det, 11)
+    numpy_scores = measure_time(np.linalg.det, 11)
+
+    print(numpy_scores)
+    print(our_det_scores)
+    plt.title("Time of counting determinant according to matrix size ")
+    plt.plot(range(1 ,11), our_det_scores, label="our implementation" )
+    plt.plot(range(1 ,11), numpy_scores, label="numpy det")
+    plt.xlabel("Size XnX of matrix")
+    plt.ylabel("Time passed to count determinant (ns)")
+    plt.grid()
+    plt.legend()
+    plt.savefig("example.png")
+
 
 
 
