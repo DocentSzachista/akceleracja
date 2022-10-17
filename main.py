@@ -1,6 +1,6 @@
-from cProfile import label
+# from cProfile import label
 import numpy as np 
-from matplotlib import pyplot as plt
+# from matplotlib import pyplot as plt
 from time import perf_counter_ns
 def det(arr): 
     def count_det(arr, i, j):
@@ -40,8 +40,30 @@ def det_iterative(arr):
 #             mul_op *= arr[row_index][dupa_zmienna if dupa_zmienna  < columns else columns - dupa_zmienna] 
 #         det_positive_part += mul_op
             
+def divide_matrix(arr: np.array):
+    assert arr.shape[0] > 2, "This method only works for 3x3 matrices and greater"
+    matrices = []
+    values = []
+
+    def divide_inner(matrix: np.array, i: int, j: int, current_value: int):
+        if matrix.shape == (3, 3):
+            matrices.append(matrix)
+            values.append(current_value)
+            return
+
+        cut_matrix = np.delete(arr, 0, 0)
+        for elem in range(matrix.shape[1]):
+            divide_inner(np.delete(cut_matrix, elem, 1), 0, elem, current_value * ((-1)**(i+j) * matrix[0, elem]))
+
+    divide_inner(arr, 0, 0, 1)
+    return (matrices, values)
 
 
+def test_divide():
+    SIZE = 4
+    m, v = divide_matrix(np.random.randint(10, size=(SIZE, SIZE)))
+    print(m)
+    print(v)
 
 
 
@@ -71,20 +93,21 @@ def measure_time(det_func, size)->list:
 
 
 if __name__ == "__main__":
-    test_det()
-    our_det_scores = measure_time(det, 11)
-    numpy_scores = measure_time(np.linalg.det, 11)
+    test_divide()
+    # test_det()
+    # our_det_scores = measure_time(det, 11)
+    # numpy_scores = measure_time(np.linalg.det, 11)
 
-    print(numpy_scores)
-    print(our_det_scores)
-    plt.title("Time of counting determinant according to matrix size ")
-    plt.plot(range(1 ,11), our_det_scores, label="our implementation" )
-    plt.plot(range(1 ,11), numpy_scores, label="numpy det")
-    plt.xlabel("Size XnX of matrix")
-    plt.ylabel("Time passed to count determinant (ns)")
-    plt.grid()
-    plt.legend()
-    plt.savefig("example.png")
+    # print(numpy_scores)
+    # print(our_det_scores)
+    # plt.title("Time of counting determinant according to matrix size ")
+    # plt.plot(range(1 ,11), our_det_scores, label="our implementation" )
+    # plt.plot(range(1 ,11), numpy_scores, label="numpy det")
+    # plt.xlabel("Size XnX of matrix")
+    # plt.ylabel("Time passed to count determinant (ns)")
+    # plt.grid()
+    # plt.legend()
+    # plt.savefig("example.png")
 
 
 
