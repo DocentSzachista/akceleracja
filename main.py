@@ -51,7 +51,7 @@ def divide_matrix(arr: np.array):
             values.append(current_value * ((-1)**(i + j)))
             return
 
-        cut_matrix = np.delete(arr, 0, 0)
+        cut_matrix = np.delete(matrix, 0, 0)
         for elem in range(matrix.shape[1]):
             divide_inner(np.delete(cut_matrix, elem, 1), 0, elem, current_value * ((-1)**(i+j) * matrix[0, elem]))
 
