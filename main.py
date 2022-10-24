@@ -48,7 +48,7 @@ def divide_matrix(arr: np.array):
     def divide_inner(matrix: np.array, i: int, j: int, current_value: int):
         if matrix.shape == (3, 3):
             matrices.append(matrix)
-            values.append(current_value)
+            values.append(current_value * ((-1)**(i + j)))
             return
 
         cut_matrix = np.delete(arr, 0, 0)
@@ -56,21 +56,32 @@ def divide_matrix(arr: np.array):
             divide_inner(np.delete(cut_matrix, elem, 1), 0, elem, current_value * ((-1)**(i+j) * matrix[0, elem]))
 
     divide_inner(arr, 0, 0, 1)
-    return (matrices, values)
+    return matrices, values
+
+def det_iter(arr: np.array):
+    if arr.shape == (1, 1):
+        return arr[0][0]
+    if arr.shape == (2, 2):
+        return arr[0][0] * arr[1][1] - arr[1][0] * arr[0][1]
+    
+    det = 0
+    m, v = divide_matrix(arr)
+    for matrix, value in zip(m, v):
+        det += value * ( 
+                  matrix[0][0] * matrix[1][1] * matrix[2][2]  
+                + matrix[0][1] * matrix[1][2] * matrix[2][0]
+                + matrix[0][2] * matrix[1][0] * matrix[2][1]
+                - matrix[0][2] * matrix[1][1] * matrix[2][0]
+                - matrix[0][0] * matrix[1][2] * matrix[2][1]
+                - matrix[0][1] * matrix[1][0] * matrix[2][2]
+            )
+    return det
 
 
-def test_divide():
-    SIZE = 4
-    m, v = divide_matrix(np.random.randint(10, size=(SIZE, SIZE)))
-    print(m)
-    print(v)
-
-
-
-def test_det():
+def test_generic(method):
     for i in range(1, 11):
         random_matrix = np.random.randint(10, size=(i, i))
-        our_impl =  det(random_matrix)
+        our_impl =  method(random_matrix)
         numpy_impl = round(np.linalg.det(random_matrix))
         if our_impl != numpy_impl:
             print(f"{our_impl} != {numpy_impl} size: {i}")
@@ -78,6 +89,12 @@ def test_det():
             print(random_matrix)
         else:
             print("Guccis")
+
+def test_det():
+    test_generic(det)
+
+def test_det_iter():
+    test_generic(det_iter)
 
 def measure_time(det_func, size)->list:
     scores = []
@@ -93,8 +110,8 @@ def measure_time(det_func, size)->list:
 
 
 if __name__ == "__main__":
-    test_divide()
     # test_det()
+    test_det_iter()
     # our_det_scores = measure_time(det, 11)
     # numpy_scores = measure_time(np.linalg.det, 11)
 
