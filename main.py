@@ -77,6 +77,24 @@ def det_iter(arr: np.array):
             )
     return det
 
+def det_iter2(arr: np.array) -> int:
+    if arr.shape == (1, 1):
+        return arr[0][0]
+    if arr.shape == (2, 2):
+        return arr[0][0] * arr[1][1] - arr[1][0] * arr[0][1]
+    
+    matrices = [arr]
+    while len(matrices) != 0:
+        if matrices[0].shape == (3, 3):
+            break
+        
+        matrix = matrices.pop(0)
+        cut_matrix = np.delete(matrix, 0, 0)
+        for i in range(matrix.shape[0]):
+            matrices.append(np.delete(cut_matrix, i, 1))
+    
+    for m in matrices:
+        print(m.shape)
 
 def test_generic(method):
     for i in range(1, 11):
@@ -111,7 +129,8 @@ def measure_time(det_func, size)->list:
 
 if __name__ == "__main__":
     # test_det()
-    test_det_iter()
+    # test_det_iter()
+    det_iter2(np.random.randint(10, size=(10, 10)))
     # our_det_scores = measure_time(det, 11)
     # numpy_scores = measure_time(np.linalg.det, 11)
 
