@@ -1,90 +1,79 @@
-from cProfile import label
+import os
 import numpy as np 
 from matplotlib import pyplot as plt
 from time import perf_counter_ns
-def det(arr): 
-    def count_det(arr, i, j):
-        if arr.shape == (3,3): 
-            return (-1) **( i+j ) * ( 
-                  arr[0][0] * arr[1][1] * arr[2][2]  
-                + arr[0][1] * arr[1][2] * arr[2][0]
-                + arr[0][2] * arr[1][0] * arr[2][1]
-                - arr[0][2] * arr[1][1] * arr[2][0]
-                - arr[0][0] * arr[1][2] * arr[2][1]
-                - arr[0][1] * arr[1][0] * arr[2][2]
-            )
-        cut_matrix = np.delete(arr, 0, 0)
-        det = 0 
-        for elem in range(arr.shape[1]):
-            det += (-1) **(i+j) * arr[0][elem] * count_det(np.delete(cut_matrix, elem, 1), 0, elem) 
-        return det    
-    
-    if arr.shape == (1, 1):
-        return arr[0][0]
-    if arr.shape == (2, 2):
-        return arr[0][0] * arr[1][1] - arr[1][0] * arr[0][1]
-    return count_det(arr, 0, 0)
 
-def det_iterative(arr): 
-    pass
+import python_impl
+import numba_impl
 
-# def det_iterative(arr):
+MATRIX_MIN_VALUE = -10
+MATRIX_MAX_VALUE = 10
 
-#     rows, columns = arr.shape
-#     det_positive_part = 0 
-    
-#     for column_index in range(columns):
-#         mul_op = 1 
-#         for row_index in range(rows):
-#             dupa_zmienna = column_index+row_index
-#             mul_op *= arr[row_index][dupa_zmienna if dupa_zmienna  < columns else columns - dupa_zmienna] 
-#         det_positive_part += mul_op
-            
+def test_correctness(method, max_size):
+    for i in range(max_size):
+        matrix = np.random.randint(MATRIX_MIN_VALUE, MATRIX_MAX_VALUE, size=(i, i))
+        np_res = round(np.linalg.det(matrix))
+        our_res = round(method(matrix))
+        assert np_res == our_res
+        print(f'Run {i + 1}/{max_size} compleated')
 
-
-
-
-
-def test_det():
-    for i in range(1, 11):
-        random_matrix = np.random.randint(10, size=(i, i))
-        our_impl =  det(random_matrix)
-        numpy_impl = round(np.linalg.det(random_matrix))
-        if our_impl != numpy_impl:
-            print(f"{our_impl} != {numpy_impl} size: {i}")
-
-            print(random_matrix)
-        else:
-            print("Guccis")
-
-def measure_time(det_func, size)->list:
-    scores = []
-    for i in range(1, size):
-        random_matrix = np.random.randint(10, size=(i, i))
+def measure_time(method, max_size):
+    times = []
+    for i in range(max_size):
+        matrix = np.random.randint(MATRIX_MIN_VALUE, MATRIX_MAX_VALUE, size=(i, i))
         start = perf_counter_ns()
-        det_func(random_matrix)
+        method(matrix)
         end = perf_counter_ns()
-        score = end - start 
-        scores.append(score)
-    return scores
+        times.append(end - start)
+    return times
 
+def make_graph(name, times, max_size):
+    plt.cla()
+    plt.title(f"Time to count a matrix determinant using '{name}'")
+    plt.plot(range(1, max_size + 1), times)
+    plt.xlabel("Size of the square matrix")
+    plt.ylabel("Time [ns]")
+    plt.grid()
+    plt.savefig(f'plots/{name}.png')
 
-
-if __name__ == "__main__":
-    test_det()
-    our_det_scores = measure_time(det, 11)
-    numpy_scores = measure_time(np.linalg.det, 11)
-
-    print(numpy_scores)
-    print(our_det_scores)
-    plt.title("Time of counting determinant according to matrix size ")
-    plt.plot(range(1 ,11), our_det_scores, label="our implementation" )
-    plt.plot(range(1 ,11), numpy_scores, label="numpy det")
-    plt.xlabel("Size XnX of matrix")
-    plt.ylabel("Time passed to count determinant (ns)")
+def make_combined_graph(names, all_times, max_size):
+    plt.cla()
+    plt.title(f"Time to count a matrix determinant using different methods")
+    for (times, name) in zip(all_times, names):
+        plt.plot(range(1, max_size + 1), times, label=name)
+    plt.xlabel("Size of the square matrix")
+    plt.ylabel("Time [ns]")
     plt.grid()
     plt.legend()
-    plt.savefig("example.png")
+    plt.savefig(f'plots/combined.png')
+
+if __name__ == "__main__":
+    if not os.path.exists('plots'):
+        os.mkdir('plots')
+
+    PERF_MAX_SIZE = 10
+    TIME_MAX_SIZE = 10
+    methods = [python_impl.det, numba_impl.det]
+    names = ["Python", "Numba"]
+    all_times = []
+    for (method, name) in zip(methods, names):
+        print(name, ":")
+        test_correctness(method, PERF_MAX_SIZE)
+        times = measure_time(method, TIME_MAX_SIZE)
+        all_times.append(times)
+        make_graph(name, times, TIME_MAX_SIZE)
+    make_combined_graph(names, all_times, TIME_MAX_SIZE)
+
+    # print(numpy_scores)
+    # print(our_det_scores)
+    # plt.title("Time of counting determinant according to matrix size ")
+    # plt.plot(range(1 ,11), our_det_scores, label="our implementation" )
+    # plt.plot(range(1 ,11), numpy_scores, label="numpy det")
+    # plt.xlabel("Size XnX of matrix")
+    # plt.ylabel("Time passed to count determinant (ns)")
+    # plt.grid()
+    # plt.legend()
+    # plt.savefig("example.png")
 
 
 

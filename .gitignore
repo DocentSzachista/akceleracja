@@ -3,6 +3,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Ignore plots directory
+plots
+
 # C extensions
 *.so
 
