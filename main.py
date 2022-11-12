@@ -47,6 +47,10 @@ def make_combined_graph(names, all_times, max_size):
     plt.legend()
     plt.savefig(f'plots/combined.png')
 
+def dump_times(name, times):
+    with open(f'plots/{name}.csv', "wt") as file:
+        file.writelines((f'{i + 1};{time}\n' for (i, time) in enumerate(times)))
+
 if __name__ == "__main__":
     if not os.path.exists('plots'):
         os.mkdir('plots')
@@ -61,6 +65,7 @@ if __name__ == "__main__":
         test_correctness(method, PERF_MAX_SIZE)
         times = measure_time(method, TIME_MAX_SIZE)
         all_times.append(times)
+        dump_times(name, times)
         make_graph(name, times, TIME_MAX_SIZE)
     make_combined_graph(names, all_times, TIME_MAX_SIZE)
 
