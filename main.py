@@ -5,6 +5,7 @@ from time import perf_counter_ns
 
 import python_impl
 import numba_impl
+import ray_impl
 
 MATRIX_MIN_VALUE = -10
 MATRIX_MAX_VALUE = 10
@@ -15,7 +16,7 @@ def test_correctness(method, max_size):
         np_res = round(np.linalg.det(matrix))
         our_res = round(method(matrix))
         assert np_res == our_res
-        print(f'Run {i + 1}/{max_size} compleated')
+        print(f'Run {i + 1}/{max_size} completed')
 
 def measure_time(method, max_size):
     times = []
@@ -57,8 +58,8 @@ if __name__ == "__main__":
 
     PERF_MAX_SIZE = 10
     TIME_MAX_SIZE = 10
-    methods = [python_impl.det, numba_impl.det]
-    names = ["Python", "Numba"]
+    methods = [python_impl.det, numba_impl.det, ray_impl.det]
+    names = ["Python", "Numba", "Ray"]
     all_times = []
     for (method, name) in zip(methods, names):
         print(name, ":")
