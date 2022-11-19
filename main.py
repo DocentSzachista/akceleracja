@@ -57,13 +57,13 @@ if __name__ == "__main__":
         os.mkdir('plots')
 
     PERF_MAX_SIZE = 10
-    TIME_MAX_SIZE = 10
-    methods = [python_impl.det, numba_impl.det, ray_impl.det]
-    names = ["Python", "Numba", "Ray"]
+    TIME_MAX_SIZE = 15
+    methods = [ ray_impl.det]
+    names = ["Ray"]
     all_times = []
     for (method, name) in zip(methods, names):
         print(name, ":")
-        test_correctness(method, PERF_MAX_SIZE)
+        # test_correctness(method, PERF_MAX_SIZE)
         times = measure_time(method, TIME_MAX_SIZE)
         all_times.append(times)
         dump_times(name, times)

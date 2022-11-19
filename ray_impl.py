@@ -1,6 +1,6 @@
 import numpy as np
 import ray
-ray.init(address='auto')
+# ray.init(address='auto')
 
 from python_impl import permutation_init, permutation_permute
 
@@ -29,7 +29,7 @@ def det(matrix: np.array) -> int:
             break
     return sum(ray.get(futures))
 
-@ray.remote
+@ray.remote(num_cpus=6)
 def compute_diagonal(matrix: np.ndarray, p: list[int], sign: int) -> int:
     prod = 1
     for i in range(matrix.shape[0]):
