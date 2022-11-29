@@ -6,12 +6,13 @@ from time import perf_counter_ns
 import python_impl
 import numba_impl
 import ray_impl
+import opencl_impl
 
 MATRIX_MIN_VALUE = -10
 MATRIX_MAX_VALUE = 10
 
 def test_correctness(method, max_size):
-    for i in range(max_size):
+    for i in range(3, max_size):
         matrix = np.random.randint(MATRIX_MIN_VALUE, MATRIX_MAX_VALUE, size=(i, i))
         np_res = round(np.linalg.det(matrix))
         our_res = round(method(matrix))
@@ -20,7 +21,7 @@ def test_correctness(method, max_size):
 
 def measure_time(method, max_size):
     times = []
-    for i in range(max_size):
+    for i in range(3, max_size):
         matrix = np.random.randint(MATRIX_MIN_VALUE, MATRIX_MAX_VALUE, size=(i, i))
         start = perf_counter_ns()
         method(matrix)
@@ -58,8 +59,8 @@ if __name__ == "__main__":
 
     PERF_MAX_SIZE = 10
     TIME_MAX_SIZE = 15
-    methods = [ ray_impl.det]
-    names = ["Ray"]
+    methods = [ opencl_impl.det]
+    names = ["open_cl"]
     all_times = []
     for (method, name) in zip(methods, names):
         print(name, ":")

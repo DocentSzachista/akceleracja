@@ -11,17 +11,17 @@ __kernel void det(__global const long* matrix, __global const long* all_p,
     long size = s[0];
 
     long gid = get_global_id(0);
-    const long* p = all_p[size * gid];
+    const long* p = all_p + (size * gid);
     long prod = 1;
     long sign = gid % 2 == 0 ? 1 : -1;
     for(long i = 0; i < size; i++) {
-        prod *= matrix[(size * i) + p[i]];
+        prod *= matrix[(size * i) + p[i] ];
     }
-    result[gid] = prod * sign;
+    result[gid] = sign*prod;
 }
 """
 
-def det(matrix: np.array) -> int:
+def det(matrix: np.ndarray) -> int:
     size = matrix.shape[0]
     if size == 1:
         return matrix[0, 0]
@@ -54,8 +54,9 @@ def det(matrix: np.array) -> int:
 
     program = cl.Program(ctx, KERNEL).build()
     knl = program.det
-    knl(queue, [size], None, matrix_gpu, all_p_gpu, result_gpu, size_gpu)
+    knl(queue, [result_size], None, matrix_gpu, all_p_gpu, result_gpu, size_gpu)
 
     cl.enqueue_copy(queue, result_cpu, result_gpu)
 
     return sum(result_cpu)
+    
